@@ -1,6 +1,7 @@
 package com.lai.controller;
 
 import com.lai.springmvc.annotation.RequestMapping;
+import com.lai.springmvc.annotation.RequestParam;
 import org.springframework.stereotype.Controller;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,13 +17,15 @@ import javax.servlet.http.HttpServletResponse;
 public class PigController {
 
     @RequestMapping("/pig/select")
-    public void selectPig(HttpServletRequest req, HttpServletResponse resp){
+    public void selectPig(HttpServletRequest req, HttpServletResponse resp,@RequestParam("username") String name){
 
+        System.out.println(name);
         System.out.println("PIG GET");
     }
     @RequestMapping("/pig/add")
-    public void addPig(HttpServletRequest req, HttpServletResponse resp){
-
+    public void addPig(HttpServletRequest req, HttpServletResponse resp,String name){
+        System.out.println(name);
         System.out.println("PIG ADD");
+
     }
 }
