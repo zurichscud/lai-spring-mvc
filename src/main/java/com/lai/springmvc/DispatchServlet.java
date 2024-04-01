@@ -1,5 +1,7 @@
 package com.lai.springmvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lai.springmvc.annotation.RequestBody;
 import com.lai.springmvc.annotation.RequestParam;
 import com.lai.springmvc.view.AbstractView;
 import com.lai.springmvc.view.ViewResolver;
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
@@ -49,8 +52,29 @@ public class DispatchServlet extends HttpServlet {
                 if (view != null) {
                     view.renderMergedOutputModel(req,resp);//解析视图
                 }
+            }else if (isRequestBody(handlerMap)){
+                //使用Jackson得到JSON
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(viewName);
+                resp.setContentType("text/html;charset=utf-8");
+                PrintWriter writer = resp.getWriter();
+                writer.write(json);
+                writer.close();
+            }else {
+                throw new RuntimeException("无法解析handler处理值");
             }
         }
+
+    }
+
+    private boolean isRequestBody(Map<String, Handler> handlerMap) {
+        for (Handler handler : handlerMap.values()) {
+            if (handler.getMethod().isAnnotationPresent(RequestBody.class))
+            {
+                return true;
+            }
+        }
+        return false;
 
     }
 
@@ -62,7 +86,7 @@ public class DispatchServlet extends HttpServlet {
     /**
      * @Description: 请求分发
      * @Param:
-     * @Return:
+     * @Return:Handler的method的运行值
      **/
     private Object executeDispatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String requestURI = req.getRequestURI();

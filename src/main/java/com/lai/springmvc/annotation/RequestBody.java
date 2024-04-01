@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @Date: 2024/4/1 18:34
  * @Description: TODO
  */
-@Target({ElementType.METHOD,ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestBody {
 }
