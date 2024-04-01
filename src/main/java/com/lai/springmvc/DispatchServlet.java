@@ -1,7 +1,7 @@
 package com.lai.springmvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lai.springmvc.annotation.RequestBody;
+import com.lai.springmvc.annotation.ResponseBody;
 import com.lai.springmvc.annotation.RequestParam;
 import com.lai.springmvc.view.AbstractView;
 import com.lai.springmvc.view.ViewResolver;
@@ -69,7 +69,7 @@ public class DispatchServlet extends HttpServlet {
 
     private boolean isRequestBody(Map<String, Handler> handlerMap) {
         for (Handler handler : handlerMap.values()) {
-            if (handler.getMethod().isAnnotationPresent(RequestBody.class))
+            if (handler.getMethod().isAnnotationPresent(ResponseBody.class))
             {
                 return true;
             }

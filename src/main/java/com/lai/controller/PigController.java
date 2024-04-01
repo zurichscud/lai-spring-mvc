@@ -1,7 +1,7 @@
 package com.lai.controller;
 
 import com.lai.bean.Pig;
-import com.lai.springmvc.annotation.RequestBody;
+import com.lai.springmvc.annotation.ResponseBody;
 import com.lai.springmvc.annotation.RequestMapping;
 import com.lai.springmvc.annotation.RequestParam;
 import org.springframework.stereotype.Controller;
@@ -46,7 +46,7 @@ public class PigController {
         System.out.println(name);
         return"/success5.jsp";
     }
-    @RequestBody
+    @ResponseBody
     @RequestMapping("/pig/test6")
     public Object test6(HttpServletRequest req, HttpServletResponse resp,String name){
         System.out.println(name);
