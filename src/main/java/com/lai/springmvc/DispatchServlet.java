@@ -1,6 +1,8 @@
 package com.lai.springmvc;
 
 import com.lai.springmvc.annotation.RequestParam;
+import com.lai.springmvc.view.AbstractView;
+import com.lai.springmvc.view.ViewResolver;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.servlet.ServletConfig;
@@ -20,22 +22,35 @@ import java.util.Map;
 public class DispatchServlet extends HttpServlet {
 
     private Map<String, Handler> handlerMap;
+    private ViewResolver viewResolver;
 
     @Override
     public void init() {
         ServletConfig servletConfig = getServletConfig();
         String location = servletConfig.getInitParameter("contextConfigLocation");
         ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(location);
-        HandlerMapping handlerMapping = new HandlerMapping(applicationContext,servletConfig.getServletContext());
+        HandlerMapping handlerMapping = new HandlerMapping(applicationContext, getServletContext());
         handlerMap = handlerMapping.getMap();
         System.out.println(handlerMap);
+        viewResolver = applicationContext.getBean(ViewResolver.class);//初始化视图解析器
+        viewResolver.setPath(getServletContext().getContextPath());
 
 
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws  IOException {
-        executeDispatch(req,resp);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        //解决中文乱码
+        req.setCharacterEncoding("utf-8");
+        Object viewName = executeDispatch(req, resp);//handler得到的return值
+        if (viewName!=null) {
+            if (viewName instanceof String) {
+                AbstractView view = viewResolver.resolveViewName(((String) viewName));
+                if (view != null) {
+                    view.renderMergedOutputModel(req,resp);//解析视图
+                }
+            }
+        }
 
     }
 
@@ -49,41 +64,42 @@ public class DispatchServlet extends HttpServlet {
      * @Param:
      * @Return:
      **/
-    private void executeDispatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private Object executeDispatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String requestURI = req.getRequestURI();
         Handler handler = handlerMap.get(requestURI);
         if (handler == null) {
             resp.getWriter().write("<h1>404 NOT FOUND</h1>");
-        }else {
+        } else {
             Object object = handler.getHandler();
             try {
                 Method method = handler.getMethod();
                 //处理方法的参数，适应不同形参列的方法
                 Class<?>[] parameterTypes = method.getParameterTypes();
-                Object[] args=new Object[parameterTypes.length];
+                Object[] args = new Object[parameterTypes.length];
                 //检查形参列是否存在Request，Response
                 for (int i = 0; i < parameterTypes.length; i++) {
-                    if (HttpServletRequest.class.isAssignableFrom(parameterTypes[i])){
-                        args[i]=req;
+                    if (HttpServletRequest.class.isAssignableFrom(parameterTypes[i])) {
+                        args[i] = req;
                     }
-                    if (HttpServletResponse.class.isAssignableFrom(parameterTypes[i])){
-                        args[i]=resp;
+                    if (HttpServletResponse.class.isAssignableFrom(parameterTypes[i])) {
+                        args[i] = resp;
                     }
                 }
                 //请求参数映射，将args填写完整
-                userParamMapping(req,method,args);
+                userParamMapping(req, method, args);
                 //调用对应的handler中的method
-                method.invoke(object,args);
+                return method.invoke(object, args);
             } catch (Exception e) {
                 throw new RuntimeException("方法执行错误");
             }
         }
+        return null;
     }
 
     /**
      * @Description: 用户自定义形参与请求参数的映射处理
-     * @Param: 
-     * @Return: 
+     * @Param:
+     * @Return:
      **/
     private void userParamMapping(HttpServletRequest req, Method method, Object[] args) {
         Parameter[] parameters = method.getParameters();

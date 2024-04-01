@@ -17,15 +17,31 @@ import javax.servlet.http.HttpServletResponse;
 public class PigController {
 
     @RequestMapping("/pig/select")
-    public void selectPig(HttpServletRequest req, HttpServletResponse resp,@RequestParam("username") String name){
+    public String selectPig(HttpServletRequest req, HttpServletResponse resp,@RequestParam("name") String name){
 
         System.out.println(name);
         System.out.println("PIG GET");
+        return "success.jsp";
     }
     @RequestMapping("/pig/add")
-    public void addPig(HttpServletRequest req, HttpServletResponse resp,String name){
+    public String addPig(HttpServletRequest req, HttpServletResponse resp,String name){
         System.out.println(name);
         System.out.println("PIG ADD");
-
+        return"redirect:/success.jsp";
+    }
+    @RequestMapping("/pig/test3")
+    public String test3(HttpServletRequest req, HttpServletResponse resp,String name){
+        System.out.println(name);
+        return"forward:/success.jsp";
+    }
+    @RequestMapping("/pig/test4")
+    public String test4(HttpServletRequest req, HttpServletResponse resp,String name){
+        System.out.println(name);
+        return"/success.jsp";
+    }
+    @RequestMapping("/pig/test5")
+    public String test5(HttpServletRequest req, HttpServletResponse resp,String name){
+        System.out.println(name);
+        return"/success5.jsp";
     }
 }
